@@ -67,6 +67,7 @@ public class GameBoard implements IGameModel
     public boolean play(int col, int row)
     {
         int v = rowsPlayed[row][col];
+        if(this.isGameOver()) { return false; }
         if(v == -1) {
             rowsPlayed[row][col] = currentPlayer;
 
