@@ -16,10 +16,16 @@ public class GameBoard implements IGameModel
     /**
      * @int rowsPlayed[row][column]
      * Describes the rows x columns played, with player number (0 or 1)
+     * @int nextPlayer
+     * Who is the next player
+     * @int amtFieldsPlayed
+     * Amount of fields "checked/filled" by a player
+     * @int winPlayer
+     * The winning player, -1 if draw or until a player has won
      */
     private int[][] rowsPlayed;
-    private int currentPlayer;
-    private int amtRowsPlayed;
+    private int nextPlayer;
+    private int amtFieldsPlayed;
     private int winPlayer;
 
     /**
@@ -30,28 +36,13 @@ public class GameBoard implements IGameModel
     }
 
     /**
-     * Sets current player to 0
-     * Resets all rows and columns played to -1 (not played)
-     */
-    public void resetGame() {
-        currentPlayer = 0;
-        amtRowsPlayed = 0;
-        winPlayer = -1;
-
-        rowsPlayed = new int[3][3];
-        for(int[] row : rowsPlayed) {
-            Arrays.fill(row, -1);
-        }
-    }
-
-    /**
      * Returns 0 for player 0, 1 for player 1.
      *
      * @return int Id of the next player.
      */
     public int getNextPlayer()
     {
-        return (currentPlayer == 0 ? 0 : 1);
+        return nextPlayer;
     }
 
     /**
@@ -69,14 +60,9 @@ public class GameBoard implements IGameModel
         int v = rowsPlayed[row][col];
         if(this.isGameOver()) { return false; }
         if(v == -1) {
-            rowsPlayed[row][col] = currentPlayer;
-
-            System.out.println("Field " + row + "x" + col + " was played by Player #" + rowsPlayed[row][col]);
-
-            if(currentPlayer == 0) { currentPlayer = 1; }
-            else { currentPlayer = 0; }
-
-            amtRowsPlayed++;
+            rowsPlayed[row][col] = nextPlayer;
+            nextPlayer = (nextPlayer == 0 ? 1 : 0);
+            amtFieldsPlayed++;
             return true;
         }
         else {
@@ -84,23 +70,18 @@ public class GameBoard implements IGameModel
         }
     }
 
+    /**
+     * Checks to see if the game is over.
+     * The game is over if 9 fields has been played
+     * If 9 fields has not been played, then game is
+     * over when a winner is found in horizontal,
+     * vertical or diagonal direction.
+     * @return boolean true if game is over, else return false
+     */
     public boolean isGameOver()
     {
-        /*
-        Diagonal 1: 0x0, 1x1, 2x2
-        Diagonal 2: 2x0, 1x1, 0x2
-        Else:
-        All of row 0, all of row 1, all of row 2
-        All of col 0, all of col 1, all of col 2
-         */
-
-        if(amtRowsPlayed < 9) {
-            if( getWinnerHorizontal() == -1 && getWinnerVertical() == -1 && getWinnerDiagonal() == -1) {
-                return false;
-            }
-            else {
-                return true;
-            }
+        if(amtFieldsPlayed < 9) {
+            return getWinnerHorizontal() != -1 || getWinnerVertical() != -1 || getWinnerDiagonal() != -1;
         }
         else {
             return true;
@@ -119,6 +100,9 @@ public class GameBoard implements IGameModel
         return winPlayer;
     }
 
+    /**
+     * Calls the resetGame method
+     */
     public void newGame() {
         resetGame();
     }
@@ -126,6 +110,23 @@ public class GameBoard implements IGameModel
     /*
     Private functions (GameBoard exclusive)
      */
+
+    /**
+     * Sets next player to 0
+     * Resets amount of fields played
+     * Sets winning player to -1
+     * Resets all rows and columns played to -1 (not played)
+     */
+    private void resetGame() {
+        nextPlayer = 0;
+        amtFieldsPlayed = 0;
+        winPlayer = -1;
+
+        rowsPlayed = new int[3][3];
+        for(int[] row : rowsPlayed) {
+            Arrays.fill(row, -1);
+        }
+    }
 
     /**
      * getAllWinner() wraps all getWinner functions, to please the tests :-)
